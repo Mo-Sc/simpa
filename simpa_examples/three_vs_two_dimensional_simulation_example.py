@@ -205,7 +205,7 @@ def run_three_vs_two_dimensional_simulation_example(spacing: float | int = 0.2, 
         ax3.plot(two_d_time_series[49], label="2D simulation")
         ax3.plot(three_d_time_series[49], label="3D simulation")
         plt.legend()
-
+        plt.savefig("three_vs_two_dimensional_simulation_example_2.png")
         plt.show()
 
 
