@@ -279,39 +279,40 @@ class MSOTAcuityEcho(PhotoacousticDevice):
             label = max(used_labels) + 1
             used_labels.add(label)
             return label
+        
+        # Commented out for fluence modeling experiments, since we already include gel, mediprene and heavy water in the segmentation maps
+        # # --- US gel ---
+        # # If specified, add layer of US gel
+        # # Thickness is drawn from a normal distribution (like in model-based volume creation case).
+        # if volume_creator_settings.get(Tags.US_GEL, False):
+        #     us_gel_thickness_mm = np.random.normal(0.4, 0.1)
+        #     us_gel_thickness_px = int(round(us_gel_thickness_mm / spacing_mm))
+        #     us_gel_label = _next_unused_label()
+        #     segmentation_map = _prepend_layer(segmentation_map, us_gel_thickness_px, us_gel_label)
+        #     segmentation_class_mapping[us_gel_label] = TissueLibrary.ultrasound_gel()
+        #     z_dim_position_shift_mm += us_gel_thickness_px * spacing_mm
+        #     self.logger.debug("Added an ultrasound gel layer to the segmentation map.")
 
-        # --- US gel ---
-        # If specified, add layer of US gel
-        # Thickness is drawn from a normal distribution (like in model-based volume creation case).
-        if volume_creator_settings.get(Tags.US_GEL, False):
-            us_gel_thickness_mm = np.random.normal(0.4, 0.1)
-            us_gel_thickness_px = int(round(us_gel_thickness_mm / spacing_mm))
-            us_gel_label = _next_unused_label()
-            segmentation_map = _prepend_layer(segmentation_map, us_gel_thickness_px, us_gel_label)
-            segmentation_class_mapping[us_gel_label] = TissueLibrary.ultrasound_gel()
-            z_dim_position_shift_mm += us_gel_thickness_px * spacing_mm
-            self.logger.debug("Added an ultrasound gel layer to the segmentation map.")
+        # # --- Mediprene membrane ---
+        # # Fixed physical thickness of the membrane (self.mediprene_membrane_height_mm).
+        # mediprene_thickness_px = int(round(self.mediprene_membrane_height_mm / spacing_mm))
+        # mediprene_label = _next_unused_label()
+        # segmentation_map = _prepend_layer(segmentation_map, mediprene_thickness_px, mediprene_label)
+        # segmentation_class_mapping[mediprene_label] = TissueLibrary.mediprene()
+        # z_dim_position_shift_mm += mediprene_thickness_px * spacing_mm
+        # self.logger.debug("Added a mediprene layer to the segmentation map.")
 
-        # --- Mediprene membrane ---
-        # Fixed physical thickness of the membrane (self.mediprene_membrane_height_mm).
-        mediprene_thickness_px = int(round(self.mediprene_membrane_height_mm / spacing_mm))
-        mediprene_label = _next_unused_label()
-        segmentation_map = _prepend_layer(segmentation_map, mediprene_thickness_px, mediprene_label)
-        segmentation_class_mapping[mediprene_label] = TissueLibrary.mediprene()
-        z_dim_position_shift_mm += mediprene_thickness_px * spacing_mm
-        self.logger.debug("Added a mediprene layer to the segmentation map.")
-
-        # --- Heavy water ---
-        # Fills the rest of the probe with heavy water (probe height minus the membrane thickness).
-        heavy_water_label = _next_unused_label()
-        segmentation_class_mapping[heavy_water_label] = TissueLibrary.heavy_water()
-        heavy_water_layer_height_mm = self.probe_height_mm - self.mediprene_membrane_height_mm
-        heavy_water_layer_height_px = int(round(heavy_water_layer_height_mm / spacing_mm))
-        segmentation_map = _prepend_layer(segmentation_map, heavy_water_layer_height_px, heavy_water_label)
-        z_dim_position_shift_mm += heavy_water_layer_height_px * spacing_mm
-        self.logger.debug(
-            f"Added a {heavy_water_layer_height_px * spacing_mm:.2f} mm heavy water layer to the segmentation map."
-        )
+        # # --- Heavy water ---
+        # # Fills the rest of the probe with heavy water (probe height minus the membrane thickness).
+        # heavy_water_label = _next_unused_label()
+        # segmentation_class_mapping[heavy_water_label] = TissueLibrary.heavy_water()
+        # heavy_water_layer_height_mm = self.probe_height_mm - self.mediprene_membrane_height_mm
+        # heavy_water_layer_height_px = int(round(heavy_water_layer_height_mm / spacing_mm))
+        # segmentation_map = _prepend_layer(segmentation_map, heavy_water_layer_height_px, heavy_water_label)
+        # z_dim_position_shift_mm += heavy_water_layer_height_px * spacing_mm
+        # self.logger.debug(
+        #     f"Added a {heavy_water_layer_height_px * spacing_mm:.2f} mm heavy water layer to the segmentation map."
+        # )
 
         # Update global z-dimension 
         global_settings[Tags.DIM_VOLUME_Z_MM] += z_dim_position_shift_mm

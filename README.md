@@ -1,269 +1,147 @@
-<div align="center">
+# Digital Twins for Fluence and Skin Tone Modeling
 
-![Logo](https://github.com/IMSY-DKFZ/simpa/raw/main/docs/source/images/simpa_logo.png?raw=true "SIMPA Logo")
+This repository describes the implementation for the publication:
+Tissue-Aware Digital Twins for Fluence and Skin Tone Modeling in Photoacoustic Imaging [insert preprint]
 
-[![Documentation Status](https://readthedocs.org/projects/simpa/badge/?version=develop)](https://simpa.readthedocs.io/en/develop/?badge=develop)
-![Build Status](https://github.com/IMSY-DKFZ/simpa/actions/workflows/automatic_testing.yml/badge.svg)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/IMSY-DKFZ/simpa/blob/main/LICENSE.md)
-[![Pypi Badge](https://img.shields.io/pypi/v/simpa)](https://pypi.org/project/simpa/)
-[![PyPI downloads](https://img.shields.io/pypi/dw/simpa?color=gr&label=pypi%20downloads)](https://pypi.org/project/simpa/)
+### Abstract
 
-</div>
+*Quantitative photoacoustic imaging remains challenging because light fluence decays with depth and varies with wavelength, introducing strong biases in measured signal intensities. These effects distort chromophore estimates, obscure deeper structures, and cause skin-type–dependent variability, which can compromise diagnostic reliability. To address these limitations,
+we present a subject-specific, physics-informed framework for fluence correction using anatomical information from co-registered ultrasound scans. A deep neural network segments key tissues to construct individualized digital twins with spatially varying optical parameter maps. Monte Carlo simulations generate in silico fluence estimates, which are used to correct the reconstructed in vivo photoacoustic image. Epidermal melanin content is estimated from the segmented epidermis and incorporated into the model to account for inter-subject variation in skin pigmentation. Evaluated on simulations and clinical datasets, our method reduces both depth-related bias and skin-type–associated signal variation, while maintaining or improving diagnostic performance. This enables large-scale, automated, and more equitable quantitative PAI analysis.*
 
-# The toolkit for Simulation and Image Processing for Photonics and Acoustics (SIMPA)
 
-SIMPA aims to facilitate realistic image simulation for optical and acoustic imaging modalities by
-providing adapters to crucial modelling steps, such as volume generation; optical modelling; acoustic
-modelling; and image reconstruction. SIMPA provides a communication layer between various modules
-that implement optical and acoustic forward and inverse models.
-Non-experts can use the toolkit to create sensible simulations from default parameters in an end-to-end fashion. Domain experts are provided with the functionality to set up a highly customisable
-pipeline according to their specific use cases and tool requirements.
-The paper that introduces SIMPA including visualisations and explanations can be found here: [https://doi.org/10.1117/1.JBO.27.8.083010](https://doi.org/10.1117/1.JBO.27.8.083010)
+## Datasets
+The datasets were collected from:
+- PAD Dataset: https://doi.org/10.1038/s43856-025-00801-1
+- FST Dataset: [in preparation]
 
-* [Getting started](#getting-started)
-* [Simulation examples](#simulation-examples)
-* [Documentation](#documentation)
-* [Reproducibility](#reproducibility)
-* [Contributing](#how-to-contribute)
-* [Performance profiling](#performance-profiling)
-* [Troubleshooting](#troubleshooting)
-* [Citation](#citation)
-* [Funding](#funding)
+Sample data may be provided upon reasonable request.
 
-The toolkit is still under development and is thus not fully tested and may contain bugs. 
-Please report any issues that you find in our Issue Tracker: https://github.com/IMSY-DKFZ/simpa/issues. 
-Also make sure to double check all value ranges of the optical and acoustic tissue properties 
-and to assess all simulation results for plausibility.
+## Overview
 
-# Getting started
+This project was realized using a number of frameworks:
 
-In order to use SIMPA in your project, SIMPA has to be installed as well as the external tools that make the actual simulations possible.
-Finally, to connect everything, SIMPA has to find all the binaries of the simulation modules you would like to use.
-The SIMPA path management takes care of that.
+### Custom SIMPA (this repository)
+Optical and acoustic simulations were done using a modified version of the Simulation and Image Processing for Photonics and Acoustics (SIMPA) toolkit ([README](README_SIMPA.md)). Some of the custom changes include (PRs / branches are linked):
+- Variable laser energy ([T428](https://github.com/IMSY-DKFZ/simpa/pull/428))
+- Updated device parameters ([T416](https://github.com/IMSY-DKFZ/simpa/pull/429))
+- Updated Acuity transducer geometry ([acuity-geometry-kwave](https://github.com/Mo-Sc/simpa/tree/acuity-geometry-kwave/simpa/core/simulation_modules/acoustic_module))
+- Improved segmentation based volume creation ([T437](https://github.com/IMSY-DKFZ/simpa/pull/437))
+- Partial volume effects for segmentation based volume creation ([T437](https://github.com/IMSY-DKFZ/simpa/pull/437))
+- Bugfixes ([T427](https://github.com/IMSY-DKFZ/simpa/pull/427))
 
-* [SIMPA installation instructions](#simpa-installation-instructions)
-* [External tools installation instructions](#external-tools-installation-instructions)
-* [Path Management](#path-management)
-* [Testing](#run-manual-tests)
 
-## SIMPA installation instructions
+The simulation pipelines, including the tissue class mappings, that were used for the 3 datasets can be found in the [experiments folder](simpa/experiments/publication).
 
-The recommended way to install SIMPA is a manual installation from the GitHub repository, please follow steps 1 - 3:
+### Optoacoustic-Ultrasound-Analysis pipeline
 
-1. `git clone https://github.com/IMSY-DKFZ/simpa.git`
-2. `cd simpa`
-3. `git checkout main`
-4. `git pull`
+The data extraction, segmentation and analysis was done using the [Ultrasound Segmentation / MSOT Analysis Pipeline](https://github.com/Mo-Sc/OA-US-Analysis-Pipeline), as described in https://doi.org/10.1117/12.3049067.
 
-Now open a python instance in the 'simpa' folder that you have just downloaded. Make sure that you have your preferred
-virtual environment activated (we also recommend python 3.10)
-1. `pip install .` or `pip install -e .` for an editable mode. 
-2. Test if the installation worked by using `python` followed by `import simpa` then `exit()`
+### Multiclass Ultrasound Segmentation
+The segmentation network used to create the tissue maps is described in [sendero-us-segmentation](https://github.com/Mo-Sc/sendero-us-segmentation).
 
-If no error messages arise, you are now setup to use SIMPA in your project.
+## Results
 
-You can also install SIMPA with pip. Simply run:
+### Figure 2
 
-`pip install simpa`
+Source: [SIM_Dataset_Samples.ipynb](experiments/publication/results/SIM_Dataset_Samples.ipynb).
 
-You also need to manually install the pytorch library to use all features of SIMPA.
-To this end, use the pytorch website tool to figure out which version to install:
-[https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)
+![Figure 2](experiments/publication/results/figures/sim_samples.png)
 
-## External tools installation instructions
+**Fig. 2**. Representative sample from the simulated dataset. **A**: Hybrid
+tissue mask, based on segmentation of in vivo scans, augmented by
+artificial vessels. **B**: Fluence map after optical simulation at 980 nm.
+**C**: Generated initial pressure distribution at 980 nm. **D**: Reconstructed
+pressure after acoustic simulation and reconstruction at 980 nm.
 
-In order to get the full SIMPA functionality, you should install all third party toolkits that make the optical and 
-acoustic simulations possible. 
+### Figure 3
 
-### mcx (Optical Forward Model)
+Source: [PAD_Dataset_Samples.ipynb](experiments/publication/results/PAD_Dataset_Samples.ipynb)
 
-Download the latest nightly build of [mcx](http://mcx.space/) on [this page](http://mcx.space/nightly/github/) for your operating system:
+![Figure 3](experiments/publication/results/figures/pad_samples.png)
 
-- Linux: `mcx-linux-x64-github-latest.zip`
-- MacOS: `mcx-macos-x64-github-latest.zip`
-- Windows: `mcx-windows-x64-github-latest.zip`
+**Fig. 3.** Two representative samples from the PAD-Dataset, including US image, uncorrected PA image (700 nm), the segmentation mask that was used to generate the digital twin, and the corrected PA image. **A**: Enhanced gastrocnemius muscle. **B**: Improved visibility of the fascia, separating gastrocnemius and soleus muscle.
 
-Then extract the files and set `MCX_BINARY_PATH=/.../mcx/bin/mcx` in your path_config.env.
 
-### k-Wave (Acoustic Forward Model)
+### Figure 4
 
-Please follow the following steps and use the k-Wave install instructions 
-for further (and much better) guidance under:
+Source: [PAD_Dataset_Results.ipynb](experiments/publication/results/PAD_Dataset_Results.ipynb)
 
-[http://www.k-wave.org/](http://www.k-wave.org/)
+![Figure 4](experiments/publication/results/figures/pad_results.png)
 
-1. Install MATLAB with the core, image processing and parallel computing toolboxes activated at the minimum.
-2. Download the kWave toolbox (version >= 1.4)
-3. Add the kWave toolbox base path to the toolbox paths in MATLAB
-4. If wanted: Download the CPP and CUDA binary files and place them in the k-Wave/binaries folder
-5. Note down the system path to the `matlab` executable file.
+**Fig. 4.** Relationship between chromophore estimates (Hb, HbO2) and the depth of the region from where they were extracted in the PAD-Dataset. Fluence correction reduces depth-related bias while maintaining or improving diagnostic performance.
 
-## Path management
+### Figure 5
 
-As a pipelining tool that serves as a communication layer between different numerical forward models and
-processing tools, SIMPA needs to be configured with the paths to these tools on your local hard drive.
-You have a couple of options to define the required path variables. 
-### Option 1: 
-Ensure that the environment variables defined in `simpa_examples/path_config.env.example` are accessible to your script during runtime. This can be done through any method you prefer, as long as the environment variables are accessible through `os.environ`. 
-### Option 2:
-Import the `PathManager` class to your project using
-`from simpa.utils import PathManager`. If a path to a `.env` file is not provided, the `PathManager` looks for a `path_config.env` file (just like the
-one we provided in the `simpa_examples/path_config.env.example`) in the following places, in this order:
-1. The optional path you give the PathManager
-2. Your $HOME$ directory
-3. The current working directory
-4. The SIMPA home directory path
-   
-For this option, please follow the instructions in the `simpa_examples/path_config.env.example` file. 
+Source: [FST_Dataset_Results.ipynb](experiments/publication/results/FST_Dataset_Results.ipynb)
 
-## Run manual tests
-To check the success of your installation ot to assess how your contributions affect the Simpa simulation outcomes, you can run the manual tests automatically. Install the testing requirements by doing `pip install .[testing]` and run the `simpa_tests/manual_tests/generate_overview.py` file. This script runs all manual tests and generates both a markdown and an HTML file that compare your results with the reference results.
+![Figure 5](experiments/publication/results/figures/fst_results_700nm.png)
 
-# Simulation examples
+**Fig. 5.** Comparison of signal intensity at 700 nm across Fitzpatrick skin types before and after fluence correction. Strong positive correlations were observed in the skin layer, and weaker negative correlations in the muscle layer below. Correlations with skin type were fully removed after correction.
 
-To get started with actual simulations, SIMPA provides an [example package](simpa_examples) of simple simulation 
-scripts to build your custom simulations upon. The [minimal optical simulation](simpa_examples/minimal_optical_simulation.py)
-is a nice start if you have MCX installed.
+### Supplemental: Oxygen Saturation Change Heatmap
 
-Generally, the following pseudo code demonstrates the construction and run of a simulation pipeline:
+![Supplemental Figure](experiments/publication/results/figures/supplement_oxygen_saturation_delta.png)
 
-```python
-import simpa as sp
+**Supplemental Fig.** Spatial changes in oxygen saturation between baseline and occlusion phase, summarized over all subjects. As expected, oxygen saturation decreases strongly in the skin and muscle layer. In the fat layer, we see a slight increase in saturation, which we attribute to spectral coloring. For more information: [insert FST paper]. After correction, the spectral coloring artefacts are reduced, while the change in skin and muscle becomes even more pronounced.
+**A**: oxygen saturation changes before correction. **B**: oxygen saturation after correction. **C**: Average tissue layout, created from all subjects segmentation mask and used to warp each subjects oxygenation map into one layout. **D**: boxplot comparison for different layers pre and post correction.
 
-# Create general settings 
-settings = sp.Settings(general_settings)
 
-# Create specific settings for each pipeline element 
-# in the simulation pipeline
-settings.set_volume_creation_settings(volume_creation_settings)
-settings.set_optical_settings(optical_settings)
-settings.set_acoustic_settings(acoustic_settings)
-settings.set_reconstruction_settings(reconstruction_settings)
 
-# Set the simulation pipeline
-simulation_pipeline = [sp.VolumeCreationModule(settings),
-                       sp.OpticalModule(settings),
-                       sp.AcousticModule(settings),
-                       sp.ReconstructionModule(settings)]
-    
-# Choose a PA device with device position in the volume
-device = sp.CustomDevice()
+## Parameter List
+The following is an (in)complete list of parameters that were used for this project:
 
-# Simulate the pipeline
-sp.simulate(simulation_pipeline, settings, device)
-```
-
-# Reproducibility
-
-For reproducibility, we provide the exact version number including the commit hash in the simpa output file.
-This can be accessed via `simpa.__version__` or by checking the tag `Tags.SIMPA_VERSION` in the output file.
-This way, you can always trace back the exact version of the code that was used to generate the simulation results.
-
-# Documentation
-
-The updated version of the SIMPA documentation can be found at [https://simpa.readthedocs.io/en/develop](https://simpa.readthedocs.io/en/develop).
-
-## Building the documentation
-
-It is also easily possible to build the SIMPA documentation from scratch.
-When the installation succeeded, and you want to make sure that you have the latest documentation
-you should do the following steps in a command line:
-
-1. Make sure that you've installed the optional dependencies needed for the documentation by running `pip install .[docs]`
-2. Navigate to the `simpa/docs` directory
-2. If you would like the documentation to have the https://readthedocs.org/ style, type `pip install sphinx-rtd-theme`
-3. Type `make html`
-4. Open the `index.html` file in the `simpa/docs/build/html` directory with your favourite browser.
-
-# How to contribute
-
-Please find a more detailed description of how to contribute as well as code style references in our
-[contribution guidelines](CONTRIBUTING.md).
-
-To contribute to SIMPA, please fork the SIMPA github repository and create a pull request with a branch containing your 
-suggested changes. The core developers will then review the suggested changes and integrate these into the code 
-base.
-
-Please make sure that you have included unit tests for your code and that all previous tests still run through. Please also run the pre-commit hooks and make sure they are passing.
-Details are found in our [contribution guidelines](CONTRIBUTING.md).
-
-There is a regular SIMPA status meeting every Friday on even calendar weeks at 10:00 CET/CEST, and you are very welcome to participate and
-raise any issues or suggest new features. If you want to join this meeting, write one of the core developers.
-
-Please see the github guidelines for creating pull requests: [https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)
-
-
-# Performance profiling
-
-When changing the SIMPA core, e.g., by refactoring/optimizing, or if you are curious about how fast your machine runs
-SIMPA, you can run the SIMPA [benchmarking scripts](simpa_examples/benchmarking/run_benchmarking.sh). Make sure to install the necessary dependencies via 
-`pip install .[profile]` and then run:
-
-```bash
-bash ./run_benchmark.sh
-```
-
-once for checking if it works and then parse [--number 100] to run it at eg 100 times for actual benchmarking.
-Please see [benchmarking.md](docs/source/benchmarking.md) for a complete explanation.
-
-
-# Understanding SIMPA
-
-**Tags** are identifiers in SIMPA used to categorize settings and components within simulations, making configurations
-modular, readable, and manageable. Tags offer organizational, flexible, and reusable benefits by acting as keys in
-configuration dictionaries.
-
-**Settings** in SIMPA control simulation behavior. They include:
-
-- **Global Settings**: Apply to the entire simulation, affecting overall properties and parameters.
-- **Component Settings**: Specific to individual components, allowing for detailed customization and optimization of
-each part of the simulation.
-
-Settings are defined in a hierarchical structure, where global settings are established first, followed by
-component-specific settings. This approach ensures comprehensive and precise control over the simulation process.
-
-**Coordinates** in SIMPA are defined so that the x axis is the lateral direction pointing to the right, y axis is the distal direction pointing towards the front and z is the depth axis pointing downwards.
-
-For detailed information, users can refer to the [understanding SIMPA documentation](./docs/source/understanding_simpa.md).
-
-# Troubleshooting
-
-In this section, known problems are listed with their solutions (if available):
-
-## 1. Error reading hdf5-files when using k-Wave binaries:
-   
-If you encounter an error similar to:
-
-    Error using h5readc
-    The filename specified was either not found on the MATLAB path or it contains unsupported characters.
-
-Look up the solution in [this thread of the k-Wave forum](http://www.k-wave.org/forum/topic/error-reading-h5-files-when-using-binaries).  
-
-## 2. KeyError: 'time_series_data'
-
-This is the error which will occur for ANY k-Wave problem. For the actual root of the problem, please either look above in
-the terminal for the source of the bug or run the scripts in Matlab to find it manually.
-      
-# Citation
-
-If you use the SIMPA tool, we would appreciate if you cite our Journal publication in the Journal of Biomedical Optics:
-
-Gröhl, Janek, Kris K. Dreher, Melanie Schellenberg, Tom Rix, Niklas Holzwarth, Patricia Vieten, Leonardo Ayala, Sarah E. Bohndiek, Alexander Seitel, and Lena Maier-Hein. *"SIMPA: an open-source toolkit for simulation and image processing for photonics and acoustics."* **Journal of Biomedical Optics** 27, no. 8 (2022).
-
-```Bibtex
-@article{2022simpatoolkit,
-  title={SIMPA: an open-source toolkit for simulation and image processing for photonics and acoustics},
-  author={Gr{\"o}hl, Janek and Dreher, Kris K and Schellenberg, Melanie and Rix, Tom and Holzwarth, Niklas and Vieten, Patricia and Ayala, Leonardo and Bohndiek, Sarah E and Seitel, Alexander and Maier-Hein, Lena},
-  journal={Journal of Biomedical Optics},
-  volume={27},
-  number={8},
-  year={2022},
-  publisher={SPIE}
-}
-```
-
-# Funding
-
-This project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (grant agreement No. [101002198]).
-
-![ERC](https://github.com/IMSY-DKFZ/simpa/raw/main/docs/source/images/LOGO_ERC-FLAG_EU_.jpg "ERC")
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Parameter</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Data Acquisition</strong></td><td>Device</td><td>MSOT Acuity Echo (iThera Medical GmbH)</td></tr>
+    <tr><td></td><td>Wavelengths (PAD-Dataset)</td><td>700,730,760,800,850,910,930,950,980,1030,1080,1100,1210nm</td></tr>
+    <tr><td></td><td>Wavelengths (FST-Dataset)</td><td>700,710,720,730,740,750,760,770,780,790,800,810,820,830,840,<br>850,860,870,880,890,900,910,920,930,940,950,960,970,980,990,<br>1000,1010,1020,1030,1040,1050,1060,1070,1080,1090,1100nm</td></tr>
+    <tr><td></td><td>Probe Radius</td><td>40 mm</td></tr>
+    <tr><td></td><td>Probe Height</td><td>43.2 mm</td></tr>
+    <tr><td></td><td>Detector Elements</td><td>256</td></tr>
+    <tr><td></td><td>Detector Element Width</td><td>0.24 mm</td></tr>
+    <tr><td></td><td>Detector Element Length</td><td>13 mm</td></tr>
+    <tr><td></td><td>Pitch</td><td>0.34 mm</td></tr>
+    <tr><td></td><td>Central Frequency</td><td>3.96 MHz</td></tr>
+    <tr><td></td><td>Bandwidth</td><td>1.53</td></tr>
+    <tr><td><strong>Reconstruction</strong></td><td>Algorithm</td><td>Backprojection (iThera Medical GmbH)</td></tr>
+    <tr><td></td><td>Speed of Sound</td><td>1540 m/s</td></tr>
+    <tr><td></td><td>Pixel Size</td><td>0.1 mm</td></tr>
+    <tr><td></td><td>Field of View</td><td>40 × 40 mm</td></tr>
+    <tr><td></td><td>Image Shape</td><td>400 × 400 px</td></tr>
+    <tr><td><strong>Unmixing</strong></td><td>Algorithm</td><td>Linear Unmixing (NNLS)</td></tr>
+    <tr><td></td><td>Chromophores</td><td>Hb, HbO₂ (Prahl)</td></tr>
+    <tr><td></td><td>Wavelengths</td><td>700, 850, 980 nm</td></tr>
+    <tr><td><strong>Segmentation Network</strong></td><td>Architecture</td><td>U-Net (6 Stages)</td></tr>
+    <tr><td></td><td>Input Size</td><td>224 × 224 px</td></tr>
+    <tr><td></td><td>Loss Function</td><td>Dice Loss + Structural Loss</td></tr>
+    <tr><td></td><td>Optimizer</td><td>Adam</td></tr>
+    <tr><td></td><td>Training Epochs</td><td>100 (Early Stopping)</td></tr>
+    <tr><td></td><td>Learning Rate</td><td>0.0001</td></tr>
+    <tr><td><strong>Digital Twin</strong></td><td>Muscle Oxygenation</td><td>0.6</td></tr>
+    <tr><td></td><td>Muscle Blood Volume Fraction</td><td>0.2</td></tr>
+    <tr><td></td><td>Vessel Oxygenation</td><td>0.8</td></tr>
+    <tr><td></td><td>Epidermis Thickness</td><td>0.1 mm</td></tr>
+    <tr><td></td><td>Melanin Volume Fraction</td><td>1%–30%</td></tr>
+    <tr><td></td><td>Skin Oxygenation (Baseline)</td><td>0.75</td></tr>
+    <tr><td></td><td>Skin Oxygenation (Occlusion)</td><td>0.4</td></tr>
+    <tr><td></td><td>Other Tissue Parameters</td><td>SIMPA</td></tr>
+    <tr><td><strong>Simulation</strong></td><td>Device</td><td>MSOT Acuity Echo Device Twin</td></tr>
+    <tr><td></td><td>Optical Model</td><td>MCX (SIMPA)</td></tr>
+    <tr><td></td><td>Number of Photons</td><td>10,000,000</td></tr>
+    <tr><td></td><td>Laser Pulse Energy (mJ)</td><td>11.25 (700 nm), 9.93 (850 nm), 6.5 (980 nm)</td></tr>
+    <tr><td></td><td>Acoustic Model</td><td>kWave (SIMPA)</td></tr>
+    <tr><td></td><td>Speed of Sound</td><td>1540 m/s</td></tr>
+    <tr><td></td><td>Sampling Frequency</td><td>40 MHz</td></tr>
+    <tr><td></td><td>Spacing</td><td>0.1 mm</td></tr>
+    <tr><td></td><td>Random Seed</td><td>471</td></tr>
+    <tr><td></td><td>Gaussian Noise Mean</td><td>1</td></tr>
+    <tr><td></td><td>Gaussian Noise Std</td><td>0.01</td></tr>
+  </tbody>
+</table>
