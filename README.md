@@ -1,18 +1,32 @@
 # Digital Twins for Fluence and Skin Tone Modeling
 
 This repository describes the implementation for the publication:
-Tissue-Aware Digital Twins for Fluence and Skin Tone Modeling in Photoacoustic Imaging [insert preprint]
+Tissue-Aware Digital Twins for Fluence and Skin Tone Modeling in Photoacoustic Imaging [preprint DOI once available]
+
+## Content
+
+- [Abstract](#abstract)
+- [Datasets](#datasets)
+- [Overview](#overview)
+  - [Custom SIMPA (this repository)](#custom-simpa-this-repository)
+  - [Optoacoustic-Ultrasound-Analysis pipeline](#optoacoustic-ultrasound-analysis-pipeline)
+  - [Multiclass Ultrasound Segmentation](#multiclass-ultrasound-segmentation)
+- [Results](#results)
+  - [Figure 2](#figure-2)
+  - [Figure 3](#figure-3)
+  - [Figure 4](#figure-4)
+  - [Figure 5](#figure-5)
+  - [Supplemental: Oxygen Saturation Change Heatmap](#supplemental-oxygen-saturation-change-heatmap)
+- [Parameter List](#parameter-list)
 
 ### Abstract
 
-*Quantitative photoacoustic imaging remains challenging because light fluence decays with depth and varies with wavelength, introducing strong biases in measured signal intensities. These effects distort chromophore estimates, obscure deeper structures, and cause skin-type–dependent variability, which can compromise diagnostic reliability. To address these limitations,
-we present a subject-specific, physics-informed framework for fluence correction using anatomical information from co-registered ultrasound scans. A deep neural network segments key tissues to construct individualized digital twins with spatially varying optical parameter maps. Monte Carlo simulations generate in silico fluence estimates, which are used to correct the reconstructed in vivo photoacoustic image. Epidermal melanin content is estimated from the segmented epidermis and incorporated into the model to account for inter-subject variation in skin pigmentation. Evaluated on simulations and clinical datasets, our method reduces both depth-related bias and skin-type–associated signal variation, while maintaining or improving diagnostic performance. This enables large-scale, automated, and more equitable quantitative PAI analysis.*
-
+*Quantitative photoacoustic imaging (PAI) remains challenging because light fluence decays with depth and varies with wavelength, introducing strong biases in measured signal intensities. These effects distort chromophore estimates, obscure deeper structures, and cause skin-type-dependent variability, which can compromise diagnostic reliability. To address these limitations, we present a subject-specific, physics-informed framework for fluence correction using anatomical information from co-registered ultrasound scans. A deep neural network segments key tissues to construct individualized digital twins with spatially varying optical parameter maps. Monte Carlo simulations generate in silico fluence estimates, which are used to correct the reconstructed in vivo photoacoustic image. Epidermal melanin content is estimated from the segmented epidermis and incorporated into the model to account for inter-subject variation in skin pigmentation. Evaluated on simulations and clinical datasets, our method reduces depth-related bias and skin-type-associated signal variation while maintaining or improving diagnostic performance. This enables large-scale, automated, and more equitable quantitative PAI analysis.*
 
 ## Datasets
-The datasets were collected from:
-- PAD Dataset: https://doi.org/10.1038/s43856-025-00801-1
-- FST Dataset: [in preparation]
+The clinical datasets are described in:
+- PAD-Dataset: https://doi.org/10.1038/s43856-025-00801-1
+- FST-Dataset: https://doi.org/10.64898/2026.11.22.26368599
 
 Sample data may be provided upon reasonable request.
 
@@ -25,16 +39,15 @@ Optical and acoustic simulations were done using a modified version of the Simul
 - Variable laser energy ([T428](https://github.com/IMSY-DKFZ/simpa/pull/428))
 - Updated device parameters ([T416](https://github.com/IMSY-DKFZ/simpa/pull/429))
 - Updated Acuity transducer geometry ([acuity-geometry-kwave](https://github.com/Mo-Sc/simpa/tree/acuity-geometry-kwave/simpa/core/simulation_modules/acoustic_module))
-- Improved segmentation based volume creation ([T437](https://github.com/IMSY-DKFZ/simpa/pull/437))
-- Partial volume effects for segmentation based volume creation ([T437](https://github.com/IMSY-DKFZ/simpa/pull/437))
+- Improved segmentation-based volume creation ([T437](https://github.com/IMSY-DKFZ/simpa/pull/437))
+- Partial volume effects for segmentation-based volume creation ([T437](https://github.com/IMSY-DKFZ/simpa/pull/437))
 - Bugfixes ([T427](https://github.com/IMSY-DKFZ/simpa/pull/427))
 
-
-The simulation pipelines, including the tissue class mappings, that were used for the 3 datasets can be found in the [experiments folder](simpa/experiments/publication).
+The simulation pipelines, including the tissue class mappings, that were used for the three datasets can be found in the [experiments folder](simpa/experiments/publication).
 
 ### Optoacoustic-Ultrasound-Analysis pipeline
 
-The data extraction, segmentation and analysis was done using the [Ultrasound Segmentation / MSOT Analysis Pipeline](https://github.com/Mo-Sc/OA-US-Analysis-Pipeline), as described in https://doi.org/10.1117/12.3049067.
+The data extraction, segmentation and analysis were done using the [Ultrasound Segmentation / MSOT Analysis Pipeline](https://github.com/Mo-Sc/OA-US-Analysis-Pipeline), as described in https://doi.org/10.1117/12.3049067 and as part of the OPTARI framework (https://doi.org/10.48550/arXiv.2610.32468).
 
 ### Multiclass Ultrasound Segmentation
 The segmentation network used to create the tissue maps is described in [sendero-us-segmentation](https://github.com/Mo-Sc/sendero-us-segmentation).
@@ -43,15 +56,11 @@ The segmentation network used to create the tissue maps is described in [sendero
 
 ### Figure 2
 
-Source: [SIM_Dataset_Samples.ipynb](experiments/publication/results/SIM_Dataset_Samples.ipynb).
+Source: [SIM_Dataset_Samples.ipynb](experiments/publication/results/SIM_Dataset_Samples.ipynb)
 
 ![Figure 2](experiments/publication/results/figures/sim_samples.png)
 
-**Fig. 2**. Representative sample from the simulated dataset. **A**: Hybrid
-tissue mask, based on segmentation of in vivo scans, augmented by
-artificial vessels. **B**: Fluence map after optical simulation at 980 nm.
-**C**: Generated initial pressure distribution at 980 nm. **D**: Reconstructed
-pressure after acoustic simulation and reconstruction at 980 nm.
+**Fig. 2.** Representative sample from the simulated dataset. **A**: Hybrid tissue mask, based on segmentation of in vivo scans, augmented by artificial vessels. **B**: Fluence map after optical simulation at 980 nm. **C**: Generated initial pressure distribution at 980 nm. **D**: Reconstructed pressure after acoustic simulation and reconstruction at 980 nm.
 
 ### Figure 3
 
@@ -61,14 +70,13 @@ Source: [PAD_Dataset_Samples.ipynb](experiments/publication/results/PAD_Dataset_
 
 **Fig. 3.** Two representative samples from the PAD-Dataset, including US image, uncorrected PA image (700 nm), the segmentation mask that was used to generate the digital twin, and the corrected PA image. **A**: Enhanced gastrocnemius muscle. **B**: Improved visibility of the fascia, separating gastrocnemius and soleus muscle.
 
-
 ### Figure 4
 
 Source: [PAD_Dataset_Results.ipynb](experiments/publication/results/PAD_Dataset_Results.ipynb)
 
 ![Figure 4](experiments/publication/results/figures/pad_results.png)
 
-**Fig. 4.** Relationship between chromophore estimates (Hb, HbO2) and the depth of the region from where they were extracted in the PAD-Dataset. Fluence correction reduces depth-related bias while maintaining or improving diagnostic performance.
+**Fig. 4.** Relationship between chromophore estimates (Hb, HbO2) and the depth of the region from where they were extracted in the PAD-Dataset. Right: ROC-AUC with 95% confidence intervals for distinguishing PAD patients from healthy volunteers (HV) based on Hb, HbO2, and mSO2. Fluence correction reduces depth-related bias while maintaining or improving diagnostic performance.
 
 ### Figure 5
 
@@ -76,19 +84,17 @@ Source: [FST_Dataset_Results.ipynb](experiments/publication/results/FST_Dataset_
 
 ![Figure 5](experiments/publication/results/figures/fst_results_700nm.png)
 
-**Fig. 5.** Comparison of signal intensity at 700 nm across Fitzpatrick skin types before and after fluence correction. Strong positive correlations were observed in the skin layer, and weaker negative correlations in the muscle layer below. Correlations with skin type were fully removed after correction.
+**Fig. 5.** Comparison of signal intensity at 700 nm across Fitzpatrick skin types before and after fluence correction. Strong positive correlations were observed in the skin layer, and weaker negative correlations in the muscle layer below. Correlations with skin type were no longer significant after correction.
 
 ### Supplemental: Oxygen Saturation Change Heatmap
 
 ![Supplemental Figure](experiments/publication/results/figures/supplement_oxygen_saturation_delta.png)
 
-**Supplemental Fig.** Spatial changes in oxygen saturation between baseline and occlusion phase, summarized over all subjects. As expected, oxygen saturation decreases strongly in the skin and muscle layer. In the fat layer, we see a slight increase in saturation, which we attribute to spectral coloring. For more information: [insert FST paper]. After correction, the spectral coloring artefacts are reduced, while the change in skin and muscle becomes even more pronounced.
-**A**: oxygen saturation changes before correction. **B**: oxygen saturation after correction. **C**: Average tissue layout, created from all subjects segmentation mask and used to warp each subjects oxygenation map into one layout. **D**: boxplot comparison for different layers pre and post correction.
-
-
+**Supplemental Fig.** Spatial changes in oxygen saturation between baseline and occlusion phase, summarized over all subjects. As expected, oxygen saturation decreases strongly in the skin and muscle layer. In the fat layer, we see a slight increase in saturation, which we attribute to spectral coloring. For more information, see the FST-Dataset publication (https://doi.org/10.64898/2026.11.22.26368599). After correction, the spectral coloring artifacts are reduced, while the change in skin and muscle becomes even more pronounced.
+**A**: Oxygen saturation changes before correction. **B**: Oxygen saturation changes after correction. **C**: Average tissue layout, created from all subjects' segmentation masks and used to warp each subject's oxygenation map into one layout. **D**: Boxplot comparison for different layers before and after correction.
 
 ## Parameter List
-The following is an (in)complete list of parameters that were used for this project:
+The following is a non-exhaustive list of parameters that were used for this project:
 
 <table>
   <thead>
